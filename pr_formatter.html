@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Format Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .container-fluid {
+            padding: 20px 30px;
+            max-width: 100%;
+        }
+        .type-tag {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .type-tag.selected {
+            background-color: #198754 !important;
+            color: white !important;
+        }
+        #output {
+            white-space: pre-wrap;
+            font-family: monospace;
+            min-height: 200px;
+        }
+        .copy-success {
+            display: none;
+        }
+        .card {
+            border: 1px solid rgba(0,0,0,.125);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <h1 class="mb-4 text-center">Pull Request Format Generator</h1>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">PR Types:</label>
+                            <div id="typeSelection">
+                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Bug</span>
+                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Task</span>
+                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Feature</span>
+                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Dependency</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Title:</label>
+                            <input type="text" id="title" class="form-control" placeholder="Short title for the PR">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Summary:</label>
+                            <textarea id="summary" class="form-control" rows="5" 
+                                    placeholder="Enter detailed summary of changes. Press Enter for new lines."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">JIRA Tickets:</label>
+                            <div id="ticketsContainer">
+                                <div class="ticket-container mb-2">
+                                    <div class="row g-2">
+                                        <div class="col-5">
+                                            <input type="text" class="form-control ticket-id" placeholder="DRCOOL-1234">
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" class="form-control ticket-url" placeholder="Jira URL or N/A">
+                                        </div>
+                                        <div class="col-auto">
+                                            <button class="btn btn-danger remove-ticket">×</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="addTicket" class="btn btn-secondary mt-2">Add Another Ticket</button>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Checklist:</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="latestCode">
+                                <label class="form-check-label" for="latestCode">
+                                    Pull the latest code from dev
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="ticketsAddressed">
+                                <label class="form-check-label" for="ticketsAddressed">
+                                    All tickets are addressed
+                                </label>
+                            </div>
+                        </div>
+
+                        <button id="generate" class="btn btn-primary">Generate PR Format</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Generated Format</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="output" class="bg-light p-3 rounded mb-3"></div>
+                        <div class="d-flex align-items-center">
+                            <button id="copyToClipboard" class="btn btn-success">
+                                Copy to Clipboard
+                            </button>
+                            <span class="copy-success text-success ms-3">✓ Copied!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Type selection
+            $('.type-tag').click(function() {
+                $(this).toggleClass('selected');
+            });
+
+            // Add ticket
+            $('#addTicket').click(function() {
+                const newTicket = `
+                    <div class="ticket-container mb-2">
+                        <div class="row g-2">
+                            <div class="col-5">
+                                <input type="text" class="form-control ticket-id" placeholder="DRCOOL-1234">
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control ticket-url" placeholder="Jira URL or N/A">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-danger remove-ticket">×</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('#ticketsContainer').append(newTicket);
+            });
+
+            // Remove ticket
+            $(document).on('click', '.remove-ticket', function() {
+                if ($('.ticket-container').length > 1) {
+                    $(this).closest('.ticket-container').remove();
+                }
+            });
+
+            // Generate format
+            $('#generate').click(function() {
+                // Collect selected types
+                const types = $('.type-tag.selected').map(function() {
+                    return $(this).text();
+                }).get();
+
+                // Collect tickets
+                const tickets = $('.ticket-container').map(function() {
+                    const id = $(this).find('.ticket-id').val();
+                    const url = $(this).find('.ticket-url').val();
+                    return {id, url};
+                }).get().filter(t => t.id);
+
+                // Get checklist status
+                const latestCode = $('#latestCode').prop('checked') ? 'Yes' : 'No';
+                const ticketsAddressed = $('#ticketsAddressed').prop('checked') ? 'Yes' : 'No';
+
+                // Generate title
+                const typeStr = types.length ? `[${types.join(', ')}]` : '';
+                const ticketStr = tickets.map(t => t.id).join(', ');
+                const customTitle = $('#title').val();
+                const title = `${typeStr} ${ticketStr}: ${customTitle}`;
+
+                // Process summary with line breaks
+                const summaryText = $('#summary').val().split('\n').map(line => line.trim() ? `- ${line}` : '').filter(Boolean).join('\n');
+
+                // Generate Jira tickets section with special handling for N/A
+                const ticketSection = tickets.map(t => {
+                    const trimmedUrl = t.url.trim();
+                    if (!trimmedUrl || trimmedUrl.toLowerCase() === 'n/a') {
+                        return `- ${t.id}`;
+                    }
+                    return `- [${t.id}](${trimmedUrl})`;
+                }).join('\n');
+
+                // Generate description
+                const description = `# Summary
+${summaryText}
+
+# Jira Tickets
+${ticketSection}
+
+# Checklist (Yes / No)
+- Pull the latest code from dev. ${latestCode}
+- All tickets are addressed. ${ticketsAddressed}`;
+
+                // Display result
+                $('#output').text(`Title: ${title}\n\nDescription:\n${description}`);
+            });
+
+            // Copy to clipboard
+            $('#copyToClipboard').click(function() {
+                const outputText = $('#output').text();
+                navigator.clipboard.writeText(outputText).then(function() {
+                    $('.copy-success').fadeIn().delay(2000).fadeOut();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
