@@ -87,8 +87,15 @@
                             <div id="ticketsContainer">
                                 <div class="ticket-container mb-2">
                                     <div class="row g-2">
-                                        <div class="col-5">
-                                            <input type="text" class="form-control ticket-id" placeholder="DRCOOL-1234 or N/A">
+                                        <div class="col-2">
+                                            <select class="form-select project-prefix">
+                                                <option value="">SELECT</option>
+                                                <option value="DRCOOL">DRCOOL</option>
+                                                <option value="N/A">N/A</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="text" class="form-control ticket-number" placeholder="1234 or N/A">
                                         </div>
                                         <div class="col">
                                             <input type="text" class="form-control ticket-url" placeholder="Jira URL">
@@ -155,6 +162,21 @@
 
     <script>
         $(document).ready(function() {
+
+            // Handle project prefix selection
+            $(document).on('change', '.project-prefix', function() {
+                const ticketNumber = $(this).closest('.ticket-container').find('.ticket-number');
+                const ticketUrl = $(this).closest('.ticket-container').find('.ticket-url');
+                
+                if ($(this).val() === 'N/A') {
+                    ticketNumber.val('N/A').prop('readonly', true);
+                    ticketUrl.val('').prop('readonly', true);
+                } else {
+                    ticketNumber.val('').prop('readonly', false);
+                    ticketUrl.val('').prop('readonly', false);
+                }
+            });
+            
             // Type selection
             $('.type-tag').click(function() {
                 $(this).toggleClass('selected');
@@ -165,8 +187,15 @@
                 const newTicket = `
                     <div class="ticket-container mb-2">
                         <div class="row g-2">
-                            <div class="col-5">
-                                <input type="text" class="form-control ticket-id" placeholder="DRCOOL-1234 or N/A">
+                             <div class="col-2">
+                                <select class="form-select project-prefix">
+                                    <option value="">SELECT</option>
+                                    <option value="DRCOOL">DRCOOL</option>
+                                    <option value="N/A">N/A</option>
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <input type="text" class="form-control ticket-number" placeholder="1234 or N/A">
                             </div>
                             <div class="col">
                                 <input type="text" class="form-control ticket-url" placeholder="Jira URL">
@@ -196,8 +225,17 @@
 
                 // Collect tickets
                 const tickets = $('.ticket-container').map(function() {
-                    const id = $(this).find('.ticket-id').val();
+                    const prefix = $(this).find('.project-prefix').val();
+                    if (prefix === 'N/A') {
+                        return {id: 'N/A', url: ''};
+                    }
+                    
+                    const number = $(this).find('.ticket-number').val();
                     const url = $(this).find('.ticket-url').val();
+
+                    // If prefix is selected, combine it with number, otherwise use number as is
+                    const id = prefix ? `${prefix}-${number}` : number;
+
                     return {id, url};
                 }).get().filter(t => t.id);
 
