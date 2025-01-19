@@ -16,16 +16,35 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .type-tag.selected {
+        /* .type-tag.selected {
             background-color: #198754 !important;
             color: white !important;
+        } */
+
+        /* Different colors for each tag type when selected */
+        .tag-bug.selected {
+            background-color: #dc3545 !important; /* Red for bugs */
+            color: white !important;
         }
-        #output {
+        .tag-task.selected {
+            background-color: #0d6efd !important; /* Blue for tasks */
+            color: white !important;
+        }
+        .tag-feature.selected {
+            background-color: #198754 !important; /* Green for features */
+            color: white !important;
+        }
+        .tag-dependency.selected {
+            background-color: #ffc107 !important; /* Yellow for dependencies */
+            color: black !important; /* Using black text for better contrast with yellow */
+        }
+
+        .output-section {
             white-space: pre-wrap;
             font-family: monospace;
-            min-height: 200px;
+            min-height: 100px;
         }
-        .copy-success {
+        .copy-success-title, .copy-success-desc {
             display: none;
         }
         .card {
@@ -45,10 +64,10 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">PR Types:</label>
                             <div id="typeSelection">
-                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Bug</span>
-                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Task</span>
-                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Feature</span>
-                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Dependency</span>
+                                <span class="type-tag tag-bug badge bg-light text-dark border me-2 mb-2">Bug</span>
+                                <span class="type-tag tag-task badge bg-light text-dark border me-2 mb-2">Task</span>
+                                <span class="type-tag tag-feature badge bg-light text-dark border me-2 mb-2">Feature</span>
+                                <span class="type-tag tag-dependency badge bg-light text-dark border me-2 mb-2">Dependency</span>
                             </div>
                         </div>
 
@@ -106,16 +125,27 @@
 
             <div class="col-md-6">
                 <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Generated Format</h5>
-                    </div>
                     <div class="card-body">
-                        <div id="output" class="bg-light p-3 rounded mb-3"></div>
-                        <div class="d-flex align-items-center">
-                            <button id="copyToClipboard" class="btn btn-success">
-                                Copy to Clipboard
-                            </button>
-                            <span class="copy-success text-success ms-3">✓ Copied!</span>
+                        <div class="mb-4">
+                            <h5 class="card-title mb-2">Title</h5>
+                            <div id="titleOutput" class="output-section bg-light p-3 rounded mb-2"></div>
+                            <div class="d-flex align-items-center">
+                                <button id="copyTitle" class="btn btn-success btn-sm">
+                                    Copy Title
+                                </button>
+                                <span class="copy-success-title text-success ms-3">✓ Copied!</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 class="card-title mb-2">Description</h5>
+                            <div id="descriptionOutput" class="output-section bg-light p-3 rounded mb-2"></div>
+                            <div class="d-flex align-items-center">
+                                <button id="copyDescription" class="btn btn-success btn-sm">
+                                    Copy Description
+                                </button>
+                                <span class="copy-success-desc text-success ms-3">✓ Copied!</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -179,7 +209,7 @@
                 const typeStr = types.length ? `[${types.join(', ')}]` : '';
                 const ticketStr = tickets.map(t => t.id).join(', ');
                 const customTitle = $('#title').val();
-                const title = `${typeStr} ${ticketStr}: ${customTitle}`;
+                const titleContent = `${typeStr} ${ticketStr}: ${customTitle}`.trim();
 
                 // Process summary with line breaks
                 const summaryText = $('#summary').val().split('\n').map(line => line.trim() ? `- ${line}` : '').filter(Boolean).join('\n');
@@ -194,7 +224,7 @@
                 }).join('\n');
 
                 // Generate description
-                const description = `# Summary
+                const descriptionContent = `# Summary
 ${summaryText}
 
 # Jira Tickets
@@ -204,15 +234,24 @@ ${ticketSection}
 - Pull the latest code from dev. ${latestCode}
 - All tickets are addressed. ${ticketsAddressed}`;
 
-                // Display result
-                $('#output').text(`Title: ${title}\n\nDescription:\n${description}`);
+                // Display results
+                $('#titleOutput').text(titleContent);
+                $('#descriptionOutput').text(descriptionContent);
             });
 
-            // Copy to clipboard
-            $('#copyToClipboard').click(function() {
-                const outputText = $('#output').text();
-                navigator.clipboard.writeText(outputText).then(function() {
-                    $('.copy-success').fadeIn().delay(2000).fadeOut();
+            // Copy title to clipboard
+            $('#copyTitle').click(function() {
+                const titleText = $('#titleOutput').text();
+                navigator.clipboard.writeText(titleText).then(function() {
+                    $('.copy-success-title').fadeIn().delay(2000).fadeOut();
+                });
+            });
+
+            // Copy description to clipboard
+            $('#copyDescription').click(function() {
+                const descriptionText = $('#descriptionOutput').text();
+                navigator.clipboard.writeText(descriptionText).then(function() {
+                    $('.copy-success-desc').fadeIn().delay(2000).fadeOut();
                 });
             });
         });
