@@ -69,10 +69,10 @@
                                 <div class="ticket-container mb-2">
                                     <div class="row g-2">
                                         <div class="col-5">
-                                            <input type="text" class="form-control ticket-id" placeholder="DRCOOL-1234">
+                                            <input type="text" class="form-control ticket-id" placeholder="DRCOOL-1234 or N/A">
                                         </div>
                                         <div class="col">
-                                            <input type="text" class="form-control ticket-url" placeholder="Jira URL or N/A">
+                                            <input type="text" class="form-control ticket-url" placeholder="Jira URL">
                                         </div>
                                         <div class="col-auto">
                                             <button class="btn btn-danger remove-ticket">×</button>
@@ -136,10 +136,10 @@
                     <div class="ticket-container mb-2">
                         <div class="row g-2">
                             <div class="col-5">
-                                <input type="text" class="form-control ticket-id" placeholder="DRCOOL-1234">
+                                <input type="text" class="form-control ticket-id" placeholder="DRCOOL-1234 or N/A">
                             </div>
                             <div class="col">
-                                <input type="text" class="form-control ticket-url" placeholder="Jira URL or N/A">
+                                <input type="text" class="form-control ticket-url" placeholder="Jira URL">
                             </div>
                             <div class="col-auto">
                                 <button class="btn btn-danger remove-ticket">×</button>
@@ -187,7 +187,7 @@
                 // Generate Jira tickets section with special handling for N/A
                 const ticketSection = tickets.map(t => {
                     const trimmedUrl = t.url.trim();
-                    if (!trimmedUrl || trimmedUrl.toLowerCase() === 'n/a') {
+                    if (t.id.trim().toLowerCase() === 'n/a') {
                         return `- ${t.id}`;
                     }
                     return `- [${t.id}](${trimmedUrl})`;
