@@ -16,10 +16,30 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .type-tag.selected {
+        
+        /* .type-tag.selected {
             background-color: #198754 !important;
             color: white !important;
+        } */
+
+        /* Different colors for each tag type when selected */
+        .tag-bug.selected {
+            background-color: #dc3545 !important; /* Red for bugs */
+            color: white !important;
         }
+        .tag-task.selected {
+            background-color: #0d6efd !important; /* Blue for tasks */
+            color: white !important;
+        }
+        .tag-feature.selected {
+            background-color: #198754 !important; /* Green for features */
+            color: white !important;
+        }
+        .tag-dependency.selected {
+            background-color: #ffc107 !important; /* Yellow for dependencies */
+            color: black !important; /* Using black text for better contrast with yellow */
+        }
+
         #output {
             white-space: pre-wrap;
             font-family: monospace;
@@ -45,10 +65,10 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Commit Types:</label>
                             <div id="typeSelection">
-                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Bug</span>
-                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Dependency</span>
-                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">New Requirement</span>
-                                <span class="type-tag badge bg-light text-dark border me-2 mb-2">Task</span>
+                                <span class="type-tag tag-bug badge bg-light text-dark border me-2 mb-2">Bug</span>
+                                <span class="type-tag tag-task badge bg-light text-dark border me-2 mb-2">Task</span>
+                                <span class="type-tag tag-feature badge bg-light text-dark border me-2 mb-2">New Requirement</span>
+                                <span class="type-tag tag-dependency badge bg-light text-dark border me-2 mb-2">Dependency</span>
                             </div>
                         </div>
 
